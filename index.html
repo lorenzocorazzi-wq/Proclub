@@ -543,7 +543,8 @@
 </div>
 
 <script>
-const CLUB_ID = '294157', PLATFORM = 'common-gen5', BASE = '/api';
+const CLUB_ID = '294157', PLATFORM = 'common-gen5';
+function apiUrl(path, params){ return '/api/proxy?'+new URLSearchParams({path,...params}); }
 let allMembers = [], careerMap = {}, sortKey = 'score', sortAsc = false;
 
 const REP   = {'0':'Sconosciuto','1':'Amatoriale','2':'Well Known','3':'Rispettato','4':'Famoso','5':'Leggenda'};
@@ -956,7 +957,7 @@ async function openPlayoffModal(){
     try{
       const results=await Promise.all(
         oppIds.map(id=>
-          fetch(`${BASE}/clubs/overallStats?platform=${PLATFORM}&clubIds=${id}`)
+          fetch(apiUrl('clubs/overallStats',{platform:PLATFORM,clubIds:id}))
             .then(r=>r.ok?r.json():null).catch(()=>null)
         )
       );
@@ -1004,9 +1005,9 @@ async function openPlayoffModal(){
 async function main(){
   try{
     const [oR,mR,cR]=await Promise.all([
-      fetch(`${BASE}/clubs/overallStats?platform=${PLATFORM}&clubIds=${CLUB_ID}`),
-      fetch(`${BASE}/members/stats?platform=${PLATFORM}&clubId=${CLUB_ID}`),
-      fetch(`${BASE}/members/career/stats?platform=${PLATFORM}&clubId=${CLUB_ID}`)
+      fetch(apiUrl('clubs/overallStats',{platform:PLATFORM,clubIds:CLUB_ID})),
+      fetch(apiUrl('members/stats',{platform:PLATFORM,clubId:CLUB_ID})),
+      fetch(apiUrl('members/career/stats',{platform:PLATFORM,clubId:CLUB_ID}))
     ]);
     const [overall,mData,cData]=await Promise.all([oR.json(),mR.json(),cR.json()]);
 

@@ -70,6 +70,15 @@ const server = http.createServer((req, res) => {
   }
 
   // Proxy API requests to EA
+  if (pathname === '/api/proxy') {
+    // Vercel-style: /api/proxy?path=clubs/overallStats&platform=...
+    const p = parsed.query.path || '';
+    const q = Object.assign({}, parsed.query);
+    delete q.path;
+    const qs = Object.keys(q).length ? '?' + new url.URLSearchParams(q).toString() : '';
+    proxyToEA(req, res, `/api/fc/${p}${qs}`);
+    return;
+  }
   if (pathname.startsWith('/api/')) {
     const eaPath = pathname.replace('/api/', '/api/fc/') + (req.url.includes('?') ? '?' + req.url.split('?')[1] : '');
     proxyToEA(req, res, eaPath);

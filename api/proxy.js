@@ -24,18 +24,16 @@ module.exports = function handler(req, res) {
     return;
   }
 
-  // req.query.path = ['clubs', 'overallStats'] for /api/clubs/overallStats
-  const pathParts = req.query.path || [];
-  const pathStr = Array.isArray(pathParts) ? pathParts.join('/') : String(pathParts);
-
-  // Rebuild query string from req.query, excluding the internal 'path' key
+  // ?path=clubs/overallStats&platform=...&clubIds=...
   const params = { ...req.query };
+  const eaSubPath = params.path || '';
   delete params.path;
+
   const queryStr = Object.keys(params).length > 0
     ? '?' + new URLSearchParams(params).toString()
     : '';
 
-  const eaPath = `/api/fc/${pathStr}${queryStr}`;
+  const eaPath = `/api/fc/${eaSubPath}${queryStr}`;
 
   const options = {
     hostname: 'proclubs.ea.com',
