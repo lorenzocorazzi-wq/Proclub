@@ -544,7 +544,17 @@
 
 <script>
 const CLUB_ID = '294157', PLATFORM = 'common-gen5';
-function apiUrl(path, params){ return '/api/proxy?'+new URLSearchParams({path,...params}); }
+const DATA_FILES = {
+  'clubs/overallStats': '/data/overall.json',
+  'members/stats':      '/data/members.json',
+  'members/career/stats': '/data/career.json',
+};
+function apiUrl(path, params) {
+  // Usa file statici per i dati del nostro club; proxy per avversari
+  const isOurClub = params.clubIds === CLUB_ID || params.clubId === CLUB_ID;
+  if (isOurClub && DATA_FILES[path]) return DATA_FILES[path];
+  return '/api/proxy?' + new URLSearchParams({path, ...params});
+}
 let allMembers = [], careerMap = {}, sortKey = 'score', sortAsc = false;
 
 const REP   = {'0':'Sconosciuto','1':'Amatoriale','2':'Well Known','3':'Rispettato','4':'Famoso','5':'Leggenda'};
