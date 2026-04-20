@@ -1,0 +1,12 @@
+{
+  "name": "billocchi-stats",
+  "version": "1.0.0",
+  "description": "FC 26 Pro Clubs stats for Billocchi Club",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

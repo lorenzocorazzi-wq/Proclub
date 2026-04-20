@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Billocchi Club — FC 26 Stats</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:     #07080f;
+      --bg2:    #0d0f1a;
+      --bg3:    #131629;
+      --bg4:    #1a1d30;
+      --gold:   #d4a843;
+      --gold2:  #f0c060;
+      --green:  #00e676;
+      --green2: #00c853;
+      --red:    #ff5252;
+      --blue:   #448aff;
+      --purple: #ab47bc;
+      --text:   #e8eaf0;
+      --muted:  #6b7280;
+      --border: rgba(212,168,67,0.15);
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior: smooth; }
+    body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; overflow-x:hidden; }
+    body::before {
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+      background-image: linear-gradient(rgba(212,168,67,.03) 1px,transparent 1px),
+                        linear-gradient(90deg,rgba(212,168,67,.03) 1px,transparent 1px);
+      background-size:40px 40px;
+    }
+
+    /* LOADER */
+    #loader { position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:24px; }
+    .loader-logo { font-family:'Rajdhani',sans-serif;font-size:48px;font-weight:700;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:4px; }
+    .loader-bar  { width:240px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden; }
+    .loader-fill { height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));animation:load 1.4s ease-in-out infinite; }
+    @keyframes load { 0%{width:0%;margin-left:0} 50%{width:60%;margin-left:20%} 100%{width:0%;margin-left:100%} }
+    .loader-text { color:var(--muted);font-size:13px;letter-spacing:3px;text-transform:uppercase; }
+
+    /* LAYOUT */
+    .wrap { position:relative;z-index:1; }
+    header { padding:28px 48px 0;display:flex;align-items:center;gap:16px; }
+    .site-brand { font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase; }
+    .site-badge { background:rgba(212,168,67,.1);border:1px solid var(--border);padding:3px 10px;border-radius:4px;font-size:11px;color:var(--gold);font-weight:600;letter-spacing:1px; }
+    .header-right { margin-left:auto; }
+    .platform-pill { background:rgba(68,138,255,.12);border:1px solid rgba(68,138,255,.3);padding:6px 14px;border-radius:20px;font-size:12px;color:var(--blue);font-weight:600;letter-spacing:1px; }
+
+    /* NAV TABS */
+    .nav-tabs { display:flex;gap:4px;padding:16px 48px 0; }
+    .nav-tab { padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);border:1px solid transparent;transition:all .2s;letter-spacing:.5px; }
+    .nav-tab:hover { color:var(--text);background:var(--bg2); }
+    .nav-tab.active { color:var(--gold);background:rgba(212,168,67,.08);border-color:var(--border); }
+
+    /* HERO */
+    .hero { padding:36px 48px 0;display:grid;grid-template-columns:1fr 300px;gap:32px;align-items:start; }
+    .club-identity { display:flex;align-items:center;gap:20px; }
+    .club-crest { width:88px;height:88px;border-radius:16px;background:var(--bg3);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:0 0 40px rgba(212,168,67,.15); }
+    .club-info h1 { font-family:'Rajdhani',sans-serif;font-size:48px;font-weight:700;line-height:1;background:linear-gradient(135deg,#fff 30%,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+    .club-meta { display:flex;flex-wrap:wrap;gap:8px;margin-top:10px; }
+    .pill { padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.5px; }
+    .pill-green { background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.2);color:var(--green); }
+    .pill-gold  { background:rgba(212,168,67,.1);border:1px solid var(--border);color:var(--gold); }
+    .pill-blue  { background:rgba(68,138,255,.1);border:1px solid rgba(68,138,255,.2);color:var(--blue); }
+    .pill-red   { background:rgba(255,82,82,.1);border:1px solid rgba(255,82,82,.2);color:var(--red); }
+
+    .skill-block { display:flex;align-items:flex-end;gap:12px;margin:16px 0; }
+    .skill-num { font-family:'Rajdhani',sans-serif;font-size:80px;font-weight:700;line-height:1;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+    .skill-lbl { font-size:12px;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:2px; }
+
+    .wdl-bar { height:10px;border-radius:5px;overflow:hidden;display:flex;background:rgba(255,255,255,.05);margin-bottom:10px; }
+    .wdl-w { background:var(--green);transition:width 1s ease; }
+    .wdl-d { background:var(--gold);transition:width 1s ease; }
+    .wdl-l { background:var(--red);transition:width 1s ease; }
+    .wdl-labels { display:flex;gap:20px; }
+    .wdl-label { display:flex;align-items:center;gap:6px;font-size:13px; }
+    .wdl-dot { width:8px;height:8px;border-radius:50%; }
+
+    /* DONUT CARD */
+    .donut-card { background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:24px;display:flex;flex-direction:column;align-items:center;gap:16px;box-shadow:0 8px 32px rgba(0,0,0,.4); }
+    .donut-title { font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:2px;align-self:flex-start; }
+    .donut-wrap { position:relative;width:170px;height:170px; }
+    .donut-center { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center; }
+    .donut-pct { font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;color:var(--green); }
+    .donut-sub { font-size:11px;color:var(--muted);letter-spacing:2px; }
+    .donut-rows { width:100%;display:flex;flex-direction:column;gap:8px; }
+    .donut-row { display:flex;justify-content:space-between;font-size:13px; }
+
+    /* FORM STRIP */
+    .form-section { padding:24px 48px 0; }
+    .section-hdr { display:flex;align-items:center;gap:16px;margin-bottom:16px; }
+    .section-title { font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:3px; }
+    .section-line { flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent); }
+    .section-sub { font-size:12px;color:var(--muted); }
+
+    .form-bubbles { display:flex;gap:8px;flex-wrap:wrap; }
+    .form-bubble { width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;border:2px solid; }
+    .fb-w { background:rgba(0,230,118,.15);border-color:var(--green);color:var(--green); }
+    .fb-d { background:rgba(212,168,67,.15);border-color:var(--gold);color:var(--gold); }
+    .fb-l { background:rgba(255,82,82,.15);border-color:var(--red);color:var(--red); }
+    .form-meta { display:flex;gap:24px;margin-top:12px;font-size:13px;color:var(--muted); }
+    .form-meta span b { color:var(--text);font-weight:600; }
+
+    /* STATS ROW */
+    .stats-row { padding:24px 48px 0;display:grid;grid-template-columns:repeat(6,1fr);gap:14px; }
+    .stat-card { background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;transition:transform .2s,box-shadow .2s;cursor:default; }
+    .stat-card:hover { transform:translateY(-3px);box-shadow:0 12px 40px rgba(212,168,67,.1);border-color:rgba(212,168,67,.3); }
+    .stat-icon { font-size:20px;margin-bottom:6px; }
+    .stat-val { font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:var(--gold2); }
+    .stat-lbl { font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.5px;margin-top:2px; }
+    .stat-sub { font-size:11px;color:var(--muted);margin-top:3px; }
+    .sbadge { margin-top:6px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;width:fit-content; }
+    .sbg { background:rgba(0,230,118,.12);color:var(--green); }
+    .sbr { background:rgba(255,82,82,.12);color:var(--red); }
+    .sbo { background:rgba(212,168,67,.12);color:var(--gold); }
+
+    /* PLAYOFF */
+    .playoff-grid { padding:0 48px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px; }
+    .playoff-card { background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center; }
+    .playoff-num { font-family:'Rajdhani',sans-serif;font-size:36px;font-weight:700;color:var(--purple); }
+    .playoff-lbl { font-size:12px;color:var(--muted);margin-top:4px;letter-spacing:.5px; }
+    .playoff-sub { font-size:11px;color:var(--muted);margin-top:6px; }
+
+    /* TOP PERFORMERS */
+    .top-grid { padding:0 48px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px; }
+    .perf-card { background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:transform .2s; }
+    .perf-card:hover { transform:translateY(-2px); }
+    .perf-card::before { content:'';position:absolute;top:0;left:0;right:0;height:3px; }
+    .pc-gold::before   { background:linear-gradient(90deg,var(--gold),var(--gold2)); }
+    .pc-green::before  { background:linear-gradient(90deg,var(--green2),var(--green)); }
+    .pc-blue::before   { background:linear-gradient(90deg,#1565c0,var(--blue)); }
+    .pc-purple::before { background:linear-gradient(90deg,#7b1fa2,var(--purple)); }
+    .perf-lbl  { font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px; }
+    .perf-name { font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;margin-top:4px; }
+    .perf-val  { font-size:36px;font-weight:700;margin-top:6px; }
+    .pc-gold   .perf-val { color:var(--gold2); }
+    .pc-green  .perf-val { color:var(--green); }
+    .pc-blue   .perf-val { color:var(--blue); }
+    .pc-purple .perf-val { color:var(--purple); }
+    .perf-sub  { font-size:12px;color:var(--muted);margin-top:4px; }
+
+    /* PLAYER TABLE */
+    .table-wrap { padding:0 48px;overflow-x:auto; }
+    .player-table { width:100%;border-collapse:collapse;background:var(--bg2);border-radius:16px;overflow:hidden;border:1px solid var(--border); }
+    .player-table thead tr { background:rgba(212,168,67,.06);border-bottom:1px solid var(--border); }
+    .player-table th { padding:12px 14px;font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;text-align:left;white-space:nowrap;cursor:pointer;user-select:none; }
+    .player-table th:hover,.player-table th.sorted { color:var(--gold2); }
+    .player-table tbody tr { border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s; }
+    .player-table tbody tr:last-child { border-bottom:none; }
+    .player-table tbody tr:hover { background:rgba(212,168,67,.04); }
+    .player-table td { padding:12px 14px;font-size:13px;white-space:nowrap; }
+    .pname { font-weight:600; }
+    .ppname { font-size:11px;color:var(--muted); }
+    .pos-badge { display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700; }
+    .pos-gk  { background:rgba(255,193,7,.15);color:#ffc107; }
+    .pos-def { background:rgba(68,138,255,.15);color:#448aff; }
+    .pos-mid { background:rgba(0,230,118,.15);color:#00e676; }
+    .pos-att { background:rgba(255,82,82,.15);color:#ff5252; }
+    .r-hi { color:var(--green);font-weight:700; }
+    .r-md { color:var(--gold);font-weight:700; }
+    .r-lo { color:var(--red);font-weight:700; }
+    .score-wrap { display:flex;align-items:center;gap:8px; }
+    .score-bg   { width:70px;height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden; }
+    .score-fill { height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green2),var(--green));transition:width 1s ease; }
+    .score-num  { font-size:13px;font-weight:700;color:var(--green);min-width:26px; }
+
+    /* PLAYER PROFILES */
+    .profiles-grid { padding:0 48px;display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:20px; }
+    .profile-card { background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:24px;display:grid;grid-template-columns:1fr 180px;gap:20px;align-items:start;transition:transform .2s,border-color .2s; }
+    .profile-card:hover { transform:translateY(-3px);border-color:rgba(212,168,67,.3); }
+    .profile-left {}
+    .profile-top { display:flex;align-items:center;gap:14px;margin-bottom:16px; }
+    .profile-avatar { width:52px;height:52px;border-radius:12px;background:var(--bg3);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--gold);flex-shrink:0; }
+    .profile-name { font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;line-height:1.2; }
+    .profile-proname { font-size:12px;color:var(--muted);margin-top:2px; }
+    .profile-tags { display:flex;flex-wrap:wrap;gap:6px;margin-top:6px; }
+    .profile-desc { font-size:13px;color:#9ca3af;line-height:1.7;margin-bottom:16px; }
+    .profile-stats { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+    .ps { display:flex;flex-direction:column;gap:2px; }
+    .ps-val { font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700; }
+    .ps-lbl { font-size:11px;color:var(--muted);letter-spacing:.5px; }
+    .profile-radar { width:180px;height:180px; }
+    .career-row { display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px; }
+    .career-row:last-child { border-bottom:none; }
+    .career-lbl { color:var(--muted); }
+    .career-val { font-weight:600;color:var(--text); }
+    .form-dots { display:flex;gap:4px;margin-top:10px; }
+    .fd { width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700; }
+
+    /* CHARTS */
+    .charts-grid { padding:0 48px;display:grid;grid-template-columns:1fr 1fr;gap:20px; }
+    .chart-card { background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px; }
+    .chart-title { font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:2px;margin-bottom:16px; }
+    .chart-wrap { height:220px; }
+
+    footer { padding:48px;text-align:center;color:var(--muted);font-size:12px;border-top:1px solid rgba(255,255,255,.04);margin-top:60px; }
+    footer span { color:var(--gold); }
+
+    /* PLAYOFF MODAL */
+    .po-modal-bg { position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto; }
+    .po-modal { background:var(--bg2);border:1px solid var(--border);border-radius:24px;width:100%;max-width:960px;padding:36px;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.7); }
+    .po-modal-close { position:absolute;top:20px;right:20px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s; }
+    .po-modal-close:hover { background:rgba(255,82,82,.15);border-color:var(--red);color:var(--red); }
+    .po-modal-title { font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px; }
+    .po-modal-sub { font-size:13px;color:var(--muted);margin-bottom:28px; }
+    .po-summary-grid { display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:28px; }
+    .po-sum-card { background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center; }
+    .po-sum-val { font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:var(--purple); }
+    .po-sum-lbl { font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:.5px; }
+    .po-section-title { font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:2px;margin:22px 0 12px;display:flex;align-items:center;gap:10px; }
+    .po-section-title::after { content:'';flex:1;height:1px;background:var(--border); }
+    .po-player-table { width:100%;border-collapse:collapse; }
+    .po-player-table th { padding:10px 12px;font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:1px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap; }
+    .po-player-table td { padding:10px 12px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04); }
+    .po-player-table tr:last-child td { border-bottom:none; }
+    .po-player-table tr:hover td { background:rgba(212,168,67,.03); }
+    .po-bar { height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;display:inline-block;width:60px;vertical-align:middle;margin-left:6px; }
+    .po-bar-fill { height:100%;border-radius:3px; }
+    .po-match-list { display:flex;flex-direction:column;gap:8px; }
+    .po-match-row { display:grid;grid-template-columns:24px 1fr auto auto auto;gap:12px;align-items:center;background:var(--bg3);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:12px 16px; }
+    .po-match-num { font-size:12px;color:var(--muted);font-weight:600; }
+    .po-match-opp { font-size:14px;font-weight:600; }
+    .po-match-opp-sub { font-size:11px;color:var(--muted); }
+    .po-match-badge { padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:.5px; }
+    .pm-w { background:rgba(0,230,118,.15);color:var(--green);border:1px solid rgba(0,230,118,.3); }
+    .pm-d { background:rgba(212,168,67,.15);color:var(--gold);border:1px solid var(--border); }
+    .pm-l { background:rgba(255,82,82,.15);color:var(--red);border:1px solid rgba(255,82,82,.3); }
+    .playoff-card { cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s; }
+    .playoff-card:hover { transform:translateY(-3px);box-shadow:0 12px 40px rgba(171,71,188,.15);border-color:rgba(171,71,188,.4); }
+    .playoff-card-hint { font-size:10px;color:var(--muted);margin-top:8px;letter-spacing:.5px; }
+    @media(max-width:700px) {
+      .po-modal { padding:20px; }
+      .po-summary-grid { grid-template-columns:repeat(2,1fr); }
+      .po-match-row { grid-template-columns:1fr auto auto; }
+      .po-match-num { display:none; }
+    }
+
+    @media(max-width:1200px) {
+      .hero { grid-template-columns:1fr; }
+      .stats-row { grid-template-columns:repeat(3,1fr); }
+      .top-grid,.playoff-grid { grid-template-columns:repeat(2,1fr); }
+      .charts-grid { grid-template-columns:1fr; }
+      .profiles-grid { grid-template-columns:1fr; }
+      .profile-card { grid-template-columns:1fr; }
+      .profile-radar { width:100%;height:200px; }
+    }
+    @media(max-width:700px) {
+      header { padding:16px 16px 0; }
+      .hero { padding:20px 16px 0; }
+      .form-section { padding-left:16px;padding-right:16px; }
+      .stats-row { padding:16px 16px 0;grid-template-columns:repeat(2,1fr);gap:10px; }
+      .top-grid,.playoff-grid { padding-left:16px;padding-right:16px;grid-template-columns:1fr; }
+      .table-wrap { padding:0 16px;-webkit-overflow-scrolling:touch; }
+      .profiles-grid,.charts-grid { padding:0 16px; }
+      footer { padding:32px 16px; }
+      .nav-tabs { padding-left:16px;padding-right:16px;flex-wrap:wrap; }
+      .club-info h1 { font-size:34px; }
+      .skill-num { font-size:56px; }
+      .form-bubble { width:36px;height:36px;font-size:13px; }
+      .perf-val { font-size:28px; }
+      .profile-card { grid-template-columns:1fr; }
+      .stat-card { padding:14px; }
+      .stat-val { font-size:22px; }
+      .site-brand { font-size:15px; }
+      .platform-pill { font-size:11px;padding:5px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-logo">BILLOCCHI CLUB</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+  <div class="loader-text">Caricamento dati FC 26 in corso…</div>
+</div>
+
+<div id="app" class="wrap" style="display:none">
+
+  <header>
+    <div class="site-brand">FC 26 Stats</div>
+    <div class="site-badge">LIVE</div>
+    <div class="header-right">
+      <div class="platform-pill">⚡ PS5 / PC — Current Gen</div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div>
+      <div class="club-identity">
+        <div class="club-crest">⚽</div>
+        <div class="club-info">
+          <h1>Billocchi Club</h1>
+          <div class="club-meta">
+            <span class="pill pill-green">Southern Europe</span>
+            <span class="pill pill-gold" id="rep-pill">Well Known</span>
+            <span class="pill pill-blue" id="div-pill">Div. 3</span>
+            <span class="pill pill-gold" id="streak-pill"></span>
+          </div>
+        </div>
+      </div>
+      <div class="skill-block">
+        <div class="skill-num" id="skill">—</div>
+        <div class="skill-lbl">Skill<br>Rating</div>
+      </div>
+      <div class="wdl-bar">
+        <div class="wdl-w" id="bW" style="width:0%"></div>
+        <div class="wdl-d" id="bD" style="width:0%"></div>
+        <div class="wdl-l" id="bL" style="width:0%"></div>
+      </div>
+      <div class="wdl-labels">
+        <div class="wdl-label"><div class="wdl-dot" style="background:var(--green)"></div><strong id="lW">—</strong>&nbsp;<span style="color:var(--muted)" id="pW"></span>&nbsp;<span style="color:var(--muted)">V</span></div>
+        <div class="wdl-label"><div class="wdl-dot" style="background:var(--gold)"></div><strong id="lD">—</strong>&nbsp;<span style="color:var(--muted)" id="pD"></span>&nbsp;<span style="color:var(--muted)">P</span></div>
+        <div class="wdl-label"><div class="wdl-dot" style="background:var(--red)"></div><strong id="lL">—</strong>&nbsp;<span style="color:var(--muted)" id="pL"></span>&nbsp;<span style="color:var(--muted)">S</span></div>
+      </div>
+    </div>
+    <div class="donut-card">
+      <div class="donut-title">Risultati</div>
+      <div class="donut-wrap">
+        <canvas id="donutChart"></canvas>
+        <div class="donut-center">
+          <div class="donut-pct" id="winRatePct">—%</div>
+          <div class="donut-sub">WIN RATE</div>
+        </div>
+      </div>
+      <div class="donut-rows">
+        <div class="donut-row"><span style="color:var(--muted)">Gol segnati</span><strong id="d-g" style="color:var(--green)">—</strong></div>
+        <div class="donut-row"><span style="color:var(--muted)">Gol subiti</span><strong id="d-ga" style="color:var(--red)">—</strong></div>
+        <div class="donut-row"><span style="color:var(--muted)">Differenza gol</span><strong id="d-gd">—</strong></div>
+        <div class="donut-row"><span style="color:var(--muted)">Partite playoff</span><strong id="d-po" style="color:var(--purple)">—</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM ULTIME PARTITE -->
+  <div class="form-section">
+    <div class="section-hdr">
+      <div class="section-title">📅 Forma Recente</div>
+      <div class="section-line"></div>
+      <div class="section-sub">Ultime 10 partite</div>
+    </div>
+    <div class="form-bubbles" id="formBubbles"></div>
+    <div class="form-meta" id="formMeta"></div>
+  </div>
+
+  <!-- STATS ROW -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon">🏆</div>
+      <div class="stat-val" id="s-tot">—</div>
+      <div class="stat-lbl">Partite Totali</div>
+      <div class="stat-sub" id="s-lega">— in lega</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⚽</div>
+      <div class="stat-val" id="s-gpg">—</div>
+      <div class="stat-lbl">Gol / Partita</div>
+      <div class="sbadge" id="s-gpg-b">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🛡️</div>
+      <div class="stat-val" id="s-gapg">—</div>
+      <div class="stat-lbl">Subiti / Partita</div>
+      <div class="sbadge" id="s-gapg-b">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🏅</div>
+      <div class="stat-val" id="s-bdiv">—</div>
+      <div class="stat-lbl">Miglior Divisione</div>
+      <div class="stat-sub" id="s-prom">— promozioni</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🏟️</div>
+      <div class="stat-val" id="s-playoff">—</div>
+      <div class="stat-lbl">Partite Playoff</div>
+      <div class="stat-sub" id="s-bgroup">Migl. finale: —</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-val" id="s-members">—</div>
+      <div class="stat-lbl">Giocatori Rosa</div>
+      <div class="sbadge sbg">Stagione corrente</div>
+    </div>
+  </div>
+
+  <!-- PLAYOFF -->
+  <div class="form-section">
+    <div class="section-hdr">
+      <div class="section-title">🏆 Sezione Playoff</div>
+      <div class="section-line"></div>
+    </div>
+  </div>
+  <div class="playoff-grid">
+    <div class="playoff-card" onclick="openPlayoffModal()">
+      <div class="playoff-num" id="po-games">—</div>
+      <div class="playoff-lbl">Partite Totali Playoff</div>
+      <div class="playoff-sub" id="po-pct"></div>
+      <div class="playoff-card-hint">🔍 Clicca per dettagli</div>
+    </div>
+    <div class="playoff-card" onclick="openPlayoffModal()">
+      <div class="playoff-num" id="po-bgroup">—</div>
+      <div class="playoff-lbl">Miglior Piazzamento (Gruppo)</div>
+      <div class="playoff-sub">Pos. in gruppo finale</div>
+      <div class="playoff-card-hint">🔍 Clicca per dettagli</div>
+    </div>
+    <div class="playoff-card" onclick="openPlayoffModal()">
+      <div class="playoff-num" id="po-prom">—</div>
+      <div class="playoff-lbl">Promozioni Totali</div>
+      <div class="playoff-sub" id="po-rel">— retrocessioni</div>
+      <div class="playoff-card-hint">🔍 Clicca per dettagli</div>
+    </div>
+    <div class="playoff-card" onclick="openPlayoffModal()">
+      <div class="playoff-num" id="po-rel2">—</div>
+      <div class="playoff-lbl">Retrocessioni</div>
+      <div class="playoff-sub">Dalla nascita del club</div>
+      <div class="playoff-card-hint">🔍 Clicca per dettagli</div>
+    </div>
+  </div>
+
+  <!-- PLAYOFF MODAL -->
+  <div id="poModalBg" class="po-modal-bg" style="display:none" onclick="if(event.target===this)closePlayoffModal()">
+    <div class="po-modal">
+      <button class="po-modal-close" onclick="closePlayoffModal()">✕</button>
+      <div class="po-modal-title">🏆 Sezione Playoff — Billocchi Club</div>
+      <div class="po-modal-sub" id="poModalSub">Caricamento...</div>
+      <div class="po-summary-grid" id="poSummaryGrid"></div>
+      <div id="poPlayerSection"></div>
+      <div id="poMatchSection"></div>
+    </div>
+  </div>
+
+  <!-- TOP PERFORMERS -->
+  <div class="form-section">
+    <div class="section-hdr">
+      <div class="section-title">⭐ Top Performers</div>
+      <div class="section-line"></div>
+    </div>
+  </div>
+  <div class="top-grid">
+    <div class="perf-card pc-gold">
+      <div class="perf-lbl">⚽ Capocannoniere</div>
+      <div class="perf-name" id="tp1n">—</div>
+      <div class="perf-val" id="tp1v">—</div>
+      <div class="perf-sub" id="tp1s">—</div>
+    </div>
+    <div class="perf-card pc-green">
+      <div class="perf-lbl">🎯 Miglior Assistman</div>
+      <div class="perf-name" id="tp2n">—</div>
+      <div class="perf-val" id="tp2v">—</div>
+      <div class="perf-sub" id="tp2s">—</div>
+    </div>
+    <div class="perf-card pc-blue">
+      <div class="perf-lbl">⭐ Miglior Rating Medio</div>
+      <div class="perf-name" id="tp3n">—</div>
+      <div class="perf-val" id="tp3v">—</div>
+      <div class="perf-sub" id="tp3s">—</div>
+    </div>
+    <div class="perf-card pc-purple">
+      <div class="perf-lbl">🎖️ Man of the Match</div>
+      <div class="perf-name" id="tp4n">—</div>
+      <div class="perf-val" id="tp4v">—</div>
+      <div class="perf-sub" id="tp4s">—</div>
+    </div>
+  </div>
+
+  <!-- PLAYER TABLE -->
+  <div class="form-section">
+    <div class="section-hdr">
+      <div class="section-title">📊 Statistiche Giocatori</div>
+      <div class="section-line"></div>
+      <div class="section-sub">Clicca colonna per ordinare</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="player-table">
+      <thead><tr>
+        <th onclick="sort('name')"># Giocatore</th>
+        <th onclick="sort('proPos')">Pos</th>
+        <th onclick="sort('gamesPlayed')">PG</th>
+        <th onclick="sort('goals')">Gol</th>
+        <th onclick="sort('assists')">Ass</th>
+        <th onclick="sort('ratingAve')">Rating</th>
+        <th onclick="sort('shotSuccessRate')">Tiro%</th>
+        <th onclick="sort('passSuccessRate')">Pass%</th>
+        <th onclick="sort('tacklesMade')">Tackle</th>
+        <th onclick="sort('tackleSuccessRate')">Tck%</th>
+        <th onclick="sort('winRate')">Win%</th>
+        <th onclick="sort('manOfTheMatch')">MoTM</th>
+        <th onclick="sort('redCards')">🟥</th>
+        <th onclick="sort('proOverall')">OVR</th>
+        <th onclick="sort('score')">Score ↓</th>
+        <th>Forma</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- PLAYER PROFILES -->
+  <div class="form-section">
+    <div class="section-hdr">
+      <div class="section-title">🎭 Profili Giocatori</div>
+      <div class="section-line"></div>
+      <div class="section-sub">Analisi da esperto · dati stagionali + carriera</div>
+    </div>
+  </div>
+  <div class="profiles-grid" id="profilesGrid"></div>
+
+  <!-- CHARTS -->
+  <div class="form-section">
+    <div class="section-hdr">
+      <div class="section-title">📈 Analisi Performance</div>
+      <div class="section-line"></div>
+    </div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Gol stagionali per giocatore</div>
+      <div class="chart-wrap"><canvas id="c1"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Rating medio per giocatore</div>
+      <div class="chart-wrap"><canvas id="c2"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Contributo offensivo (Gol + Assist)</div>
+      <div class="chart-wrap"><canvas id="c3"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Win Rate per giocatore (%)</div>
+      <div class="chart-wrap"><canvas id="c4"></canvas></div>
+    </div>
+  </div>
+
+  <footer>
+    Dati live via <span>EA Sports FC 26 API</span> · Billocchi Club (ID: 294157) · common-gen5<br>
+    <span style="color:var(--muted);font-size:11px;margin-top:8px;display:block">Non affiliato con EA Sports</span>
+  </footer>
+
+</div>
+
+<script>
+const CLUB_ID = '294157', PLATFORM = 'common-gen5', BASE = '/api';
+let allMembers = [], careerMap = {}, sortKey = 'score', sortAsc = false;
+
+const REP   = {'0':'Sconosciuto','1':'Amatoriale','2':'Well Known','3':'Rispettato','4':'Famoso','5':'Leggenda'};
+const POSES = {'0':'GK','1':'CB','2':'CB','3':'CB','4':'CB','5':'LB','6':'RB','7':'LWB','8':'RWB','10':'CDM','14':'CM','15':'CAM','23':'LW','24':'RW','25':'ST','27':'CF','28':'CF'};
+const PCLASS = {'GK':'pos-gk','CB':'pos-def','LB':'pos-def','RB':'pos-def','LWB':'pos-def','RWB':'pos-def','CDM':'pos-mid','CM':'pos-mid','CAM':'pos-mid','LW':'pos-mid','RW':'pos-mid','ST':'pos-att','CF':'pos-att'};
+
+function posLabel(c){ return POSES[String(c)]||'CM'; }
+function posClass(c){ const p=posLabel(c); return PCLASS[p]||'pos-mid'; }
+
+function score(m){
+  const gp=Math.max(+m.gamesPlayed,1);
+  return Math.round(Math.min(
+    (+m.goals*4 + +m.assists*2.5 + +m.ratingAve*8 + (+m.manOfTheMatch/gp)*40 + +m.winRate*.3 + +m.shotSuccessRate*.5 + +m.passSuccessRate*.2 - +m.redCards*8),
+    99));
+}
+
+function rClass(v){ return v>=8?'r-hi':v>=7?'r-md':'r-lo'; }
+
+function sparkSVG(vals){
+  if(!vals||!vals.length) return '';
+  const w=72,h=24,p=2,max=Math.max(...vals,1);
+  const pts=vals.map((v,i)=>{
+    const x=p+i*((w-p*2)/(vals.length-1));
+    const y=h-p-((v/max)*(h-p*2));
+    return `${x},${y}`;
+  });
+  const c=vals[vals.length-1]>=vals[0]?'#00e676':'#ff5252';
+  return `<svg width="${w}" height="${h}"><polyline points="${pts.join(' ')}" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${pts[pts.length-1].split(',')[0]}" cy="${pts[pts.length-1].split(',')[1]}" r="2.5" fill="${c}"/></svg>`;
+}
+
+function prevGoals(m){
+  const a=[];
+  for(let i=10;i>=0;i--){
+    const k=i===0?'prevGoals':`prevGoals${i}`;
+    if(m[k]!==undefined) a.push(+m[k]);
+  }
+  return a.slice(0,10);
+}
+
+/* ── Expert player descriptions ─────────────────────────────────────── */
+function generateDesc(m, career){
+  const gp  = Math.max(+m.gamesPlayed,1);
+  const gpg  = +m.goals/gp, apg=+m.assists/gp;
+  const pos  = posLabel(m.proPos);
+  const rat  = +m.ratingAve, wr=+m.winRate;
+  const shot = +m.shotSuccessRate, pass=+m.passSuccessRate;
+  const tck  = +m.tackleSuccessRate, tckN=+m.tacklesMade;
+  const motm = +m.manOfTheMatch, rc=+m.redCards;
+  const carG = career ? +career.goals : null;
+  const carGP= career ? Math.max(+career.gamesPlayed,1) : null;
+
+  let parts=[];
+
+  // Role archetype
+  if(pos==='GK'){
+    parts.push('Portiere del club.');
+    if(+m.cleanSheetsGK>0) parts.push(`Ha mantenuto la porta inviolata ${m.cleanSheetsGK} volte.`);
+    if(rat>=8) parts.push('Il suo rating medio elevatissimo lo rende il riferimento difensivo della squadra.');
+    else if(rat>=7) parts.push('Portiere affidabile con buone letture del gioco.');
+    else parts.push('Ancora in fase di crescita nel ruolo.');
+
+  } else if(['CB','LB','RB','LWB','RWB'].includes(pos)){
+    parts.push(`Difensore${pos==='CB'?' centrale':pos.includes('B')?' di fascia':''} con ${gp} presenze stagionali.`);
+    if(tckN>100&&tck>40) parts.push(`Solido nei duelli (${tckN} tackle, ${tck}% efficienza), lavora duro in fase di interdizione.`);
+    if(apg>0.3) parts.push(`Contribuisce alla manovra offensiva con ${m.assists} assist, dote rara per un difensore.`);
+    if(rat>=8) parts.push('Il suo rating lo classifica tra i migliori nel suo ruolo.');
+    if(+m.cleanSheetsDef>5) parts.push(`${m.cleanSheetsDef} clean sheet testimoniano la solidità difensiva.`);
+
+  } else if(['CDM','CM','CAM'].includes(pos)){
+    parts.push(`Centrocampista${pos==='CDM'?' di rottura':pos==='CAM'?' di fantasia':''} con ${gp} partite all'attivo.`);
+    if(apg>=1) parts.push(`Visione di gioco straordinaria: ${m.assists} assist stagionali lo rendono il regista offensivo del team.`);
+    else if(apg>=0.5) parts.push(`${m.assists} assist dimostrano una buona capacità di smistamento e passaggi chiave.`);
+    if(gpg>=0.5) parts.push(`Pericoloso anche in zone di conclusione con ${m.goals} gol.`);
+    if(pass>=75) parts.push(`La sua precisione nei passaggi (${pass}%) garantisce fluidità alla manovra.`);
+    if(tckN>50) parts.push(`Non disdegna il lavoro sporco: ${tckN} tackle, essenziale anche in fase difensiva.`);
+
+  } else if(['LW','RW'].includes(pos)){
+    parts.push(`Ala ${pos==='LW'?'sinistra':'destra'} dinamica con ${gp} presenze.`);
+    if(gpg>=0.8) parts.push(`Prolifico sottoporta: ${m.goals} gol in stagione, una media di ${gpg.toFixed(2)} a partita.`);
+    if(apg>=0.5) parts.push(`Importante anche in fase di creazione con ${m.assists} assist.`);
+    if(shot>=35) parts.push(`Ottima efficienza realizzativa (${shot}% di tiri a segno).`);
+
+  } else { // ST, CF
+    parts.push(`Attaccante con ${gp} presenze in stagione.`);
+    if(gpg>=1.2) parts.push(`Bomber di razza: ${m.goals} reti equivalgono a ${gpg.toFixed(2)} gol per partita — numeri da predatore d'area assoluto.`);
+    else if(gpg>=0.7) parts.push(`Finalizzatore solido con ${m.goals} gol in stagione (${gpg.toFixed(2)}/partita).`);
+    else parts.push(`${m.goals} gol stagionali, potenziale ancora da esprimere.`);
+    if(apg>=0.4) parts.push(`Non solo gol: ${m.assists} assist lo rendono pericoloso anche nel gioco associativo.`);
+    if(shot>=35) parts.push(`Efficiente nel tiro (${shot}% successo).`);
+  }
+
+  // Win rate comment
+  if(wr>=60) parts.push(`Con il ${wr}% di vittorie il suo impatto sulla squadra è determinante.`);
+  else if(wr<40) parts.push(`Il win rate del ${wr}% suggerisce un contesto di squadra altalenante.`);
+
+  // MoTM comment
+  if(motm>=20) parts.push(`${motm} premi Man of the Match sono la consacrazione del suo livello eccellente.`);
+  else if(motm>=5) parts.push(`${motm} MoTM testimoniano le sue prestazioni di alto livello.`);
+
+  // Red cards
+  if(rc>=3) parts.push(`⚠️ ${rc} espulsioni — serve maggiore controllo agonistico.`);
+
+  // Career comparison
+  if(career && carG && carGP){
+    const carGpg = carG/carGP;
+    if(Math.abs(carGpg - gpg)>0.3){
+      if(gpg>carGpg) parts.push(`In questa stagione sta andando oltre la sua media storica (${carGpg.toFixed(2)} gol/g in carriera): momento di forma straordinario.`);
+      else parts.push(`Leggermente sotto la sua media carriera (${carGpg.toFixed(2)} gol/g): qualcosa da ritrovare.`);
+    }
+  }
+
+  return parts.join(' ');
+}
+
+/* ── Radar for profile cards ─────────────────────────────────────────── */
+const RCOLORS = ['#f0c060','#00e676','#448aff','#ab47bc','#ff5252','#26c6da','#ff7043','#66bb6a','#ec407a','#29b6f6','#a5d6a7'];
+
+function buildRadar(canvasId, m, maxGpg, maxApg, maxRat, minRat, color){
+  const gp=Math.max(+m.gamesPlayed,1);
+  const ctx=document.getElementById(canvasId).getContext('2d');
+  const fill=color+'33';
+  new Chart(ctx,{
+    type:'radar',
+    data:{
+      labels:['Gol/G','Assist/G','Rating','Tiro%','Pass%','Win%'],
+      datasets:[{
+        data:[
+          Math.round(Math.min(((+m.goals/gp)/maxGpg)*99,99)),
+          Math.round(Math.min(((+m.assists/gp)/maxApg)*99,99)),
+          Math.round(Math.min(((+m.ratingAve-minRat)/(maxRat-minRat+.1))*99,99)),
+          Math.min(+m.shotSuccessRate*1.8,99),
+          Math.min(+m.passSuccessRate*1.1,99),
+          Math.min(+m.winRate*1.4,99),
+        ],
+        backgroundColor:fill, borderColor:color, borderWidth:2.5,
+        pointBackgroundColor:color, pointBorderColor:'#fff', pointBorderWidth:1, pointRadius:3, pointHoverRadius:5,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      scales:{r:{min:0,max:99,ticks:{display:false},grid:{color:'rgba(255,255,255,.1)'},angleLines:{color:'rgba(255,255,255,.15)'},pointLabels:{color:'#9ca3af',font:{size:10,family:'Inter'}}}},
+      plugins:{legend:{display:false}}
+    }
+  });
+}
+
+/* ── Render profiles ─────────────────────────────────────────────────── */
+function renderProfiles(members){
+  const q=members.filter(m=>+m.gamesPlayed>=3);
+  const maxGpg=Math.max(...q.map(m=>+m.goals/Math.max(+m.gamesPlayed,1)),.01);
+  const maxApg=Math.max(...q.map(m=>+m.assists/Math.max(+m.gamesPlayed,1)),.01);
+  const maxRat=Math.max(...q.map(m=>+m.ratingAve),6.5);
+  const minRat=Math.min(...q.map(m=>+m.ratingAve),maxRat-.1);
+
+  document.getElementById('profilesGrid').innerHTML = q.map((m,i)=>{
+    const initials=m.name.substring(0,2).toUpperCase();
+    const pos=posLabel(m.proPos);
+    const sc=score(m);
+    const gp=Math.max(+m.gamesPlayed,1);
+    const career=careerMap[m.name];
+    const desc=generateDesc(m,career);
+    const color=RCOLORS[i%RCOLORS.length];
+    const pg=prevGoals(m);
+    const formDots=pg.slice(-5).map(v=>`<div class="fd" style="background:${v>0?'rgba(0,230,118,.2)':'rgba(255,82,82,.1)'};color:${v>0?'var(--green)':'var(--muted)'}">${v}</div>`).join('');
+
+    return `<div class="profile-card">
+      <div class="profile-left">
+        <div class="profile-top">
+          <div class="profile-avatar" style="border-color:${color};color:${color}">${initials}</div>
+          <div>
+            <div class="profile-name">${m.name}</div>
+            <div class="profile-proname">${m.proName||''} · ${m.proHeight||'—'}cm · OVR ${m.proOverall||'—'}</div>
+            <div class="profile-tags" style="margin-top:6px">
+              <span class="pos-badge ${posClass(m.proPos)}">${pos}</span>
+              <span class="pill pill-gold" style="font-size:10px;padding:2px 8px">Score ${sc}</span>
+              ${+m.redCards>0?`<span class="pill pill-red" style="font-size:10px;padding:2px 8px">🟥 ${m.redCards}</span>`:''}
+            </div>
+          </div>
+        </div>
+        <p class="profile-desc">${desc}</p>
+        <div class="profile-stats">
+          <div class="ps"><div class="ps-val" style="color:var(--gold2)">${m.goals}</div><div class="ps-lbl">Gol stagionali</div></div>
+          <div class="ps"><div class="ps-val" style="color:var(--green)">${m.assists}</div><div class="ps-lbl">Assist stagionali</div></div>
+          <div class="ps"><div class="ps-val" style="color:var(--blue)">${m.ratingAve}</div><div class="ps-lbl">Rating medio</div></div>
+          <div class="ps"><div class="ps-val" style="color:var(--purple)">${m.manOfTheMatch}</div><div class="ps-lbl">MoTM</div></div>
+        </div>
+        ${career?`<div style="margin-top:14px;border-top:1px solid rgba(255,255,255,.06);padding-top:12px">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Carriera Totale</div>
+          <div class="career-row"><span class="career-lbl">Partite</span><span class="career-val">${career.gamesPlayed}</span></div>
+          <div class="career-row"><span class="career-lbl">Gol</span><span class="career-val">${career.goals}</span></div>
+          <div class="career-row"><span class="career-lbl">Assist</span><span class="career-val">${career.assists}</span></div>
+          <div class="career-row"><span class="career-lbl">MoTM</span><span class="career-val">${career.manOfTheMatch}</span></div>
+          <div class="career-row"><span class="career-lbl">Rating medio (carriera)</span><span class="career-val">${career.ratingAve}</span></div>
+        </div>`:''}
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px">FORMA ULTIMI 5 PERIODI</div>
+          <div class="form-dots">${formDots}</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;text-align:center">Radar Performance</div>
+        <div style="height:200px;width:100%">
+          <canvas id="pr_${i}" style="width:100%;height:100%"></canvas>
+        </div>
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">Tiro%</span><span>${m.shotSuccessRate}%</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">Pass%</span><span>${m.passSuccessRate}%</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">Tackle</span><span>${m.tacklesMade} (${m.tackleSuccessRate}%)</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">Win Rate</span><span style="color:${+m.winRate>=50?'var(--green)':'var(--red)'}">${m.winRate}%</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">OVR Pro</span><span style="color:var(--gold)">${m.proOverall||'—'}</span></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Build radars after DOM insert
+  q.forEach((m,i)=>{
+    buildRadar(`pr_${i}`,m,maxGpg,maxApg,maxRat,minRat,RCOLORS[i%RCOLORS.length]);
+  });
+}
+
+/* ── Render table ────────────────────────────────────────────────────── */
+function sort(k){ if(sortKey===k)sortAsc=!sortAsc;else{sortKey=k;sortAsc=false;} renderTable(); }
+
+function renderTable(){
+  const sorted=[...allMembers].sort((a,b)=>{
+    let va=sortKey==='score'?score(a):(isNaN(+a[sortKey])?a[sortKey]:+a[sortKey]);
+    let vb=sortKey==='score'?score(b):(isNaN(+b[sortKey])?b[sortKey]:+b[sortKey]);
+    if(typeof va==='string') return sortAsc?va.localeCompare(vb):vb.localeCompare(va);
+    return sortAsc?va-vb:vb-va;
+  });
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML=sorted.map((m,i)=>{
+    const sc=score(m), sp=prevGoals(m);
+    return `<tr>
+      <td><div class="pname">${i+1}. ${m.name}</div><div class="ppname">${m.proName||''}</div></td>
+      <td><span class="pos-badge ${posClass(m.proPos)}">${posLabel(m.proPos)}</span></td>
+      <td style="color:var(--muted)">${m.gamesPlayed}</td>
+      <td style="font-weight:700;color:var(--gold2)">${m.goals}</td>
+      <td>${m.assists}</td>
+      <td class="${rClass(+m.ratingAve)}">${m.ratingAve}</td>
+      <td>${m.shotSuccessRate}%</td>
+      <td>${m.passSuccessRate}%</td>
+      <td>${m.tacklesMade}</td>
+      <td>${m.tackleSuccessRate}%</td>
+      <td style="color:${+m.winRate>=50?'var(--green)':'var(--red)'};font-weight:600">${m.winRate}%</td>
+      <td style="color:var(--purple);font-weight:600">${m.manOfTheMatch}</td>
+      <td style="color:${+m.redCards>0?'var(--red)':'var(--muted)'}">${m.redCards}</td>
+      <td style="color:var(--gold)">${m.proOverall||'—'}</td>
+      <td><div class="score-wrap"><div class="score-bg"><div class="score-fill" style="width:${sc}%"></div></div><div class="score-num">${sc}</div></div></td>
+      <td>${sparkSVG(sp)}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── Bar charts ──────────────────────────────────────────────────────── */
+function buildBar(id,names,data,label,colors,borders){
+  const ctx=document.getElementById(id).getContext('2d');
+  new Chart(ctx,{type:'bar',data:{labels:names,datasets:[{label,data,backgroundColor:colors,borderColor:borders,borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#6b7280',font:{size:11}},grid:{display:false}},y:{ticks:{color:'#6b7280',font:{size:11}},grid:{color:'rgba(255,255,255,.05)'}}}}});
+}
+
+/* ── Playoff Modal ───────────────────────────────────────────────────── */
+let playoffClubData = null;
+
+function closePlayoffModal(){
+  document.getElementById('poModalBg').style.display='none';
+  document.body.style.overflow='';
+}
+
+async function openPlayoffModal(){
+  const modal = document.getElementById('poModalBg');
+  modal.style.display='flex';
+  document.body.style.overflow='hidden';
+  modal.scrollTop=0;
+
+  const club = playoffClubData;
+  if(!club){ document.getElementById('poModalSub').textContent='Dati non ancora caricati.'; return; }
+
+  const totPO = +(club.gamesPlayedPlayoff||0);
+  const tot   = +(club.wins||0) + +(club.ties||0) + +(club.losses||0);
+  const poPct = tot ? Math.round(totPO/tot*100) : 0;
+
+  // Finishes per division group 1
+  const divFinishes = [];
+  for(let d=1;d<=6;d++){
+    const v=+(club[`finishesInDivision${d}Group1`]||0);
+    if(v>0) divFinishes.push({div:d,count:v});
+  }
+
+  document.getElementById('poModalSub').textContent =
+    `${totPO} partite disputate in playoff · ${poPct}% del totale partite`;
+
+  const sumItems = [
+    { val: totPO,               lbl: 'Partite Playoff' },
+    { val: 'Gr. '+club.bestFinishGroup, lbl: 'Miglior Piazzamento' },
+    { val: club.promotions,     lbl: 'Promozioni Totali' },
+    { val: club.relegations,    lbl: 'Retrocessioni' },
+    { val: poPct+'%',           lbl: '% Partite in Playoff' },
+  ];
+  document.getElementById('poSummaryGrid').innerHTML = sumItems.map(s=>`
+    <div class="po-sum-card">
+      <div class="po-sum-val">${s.val}</div>
+      <div class="po-sum-lbl">${s.lbl}</div>
+    </div>`).join('');
+
+  // Finishes by division
+  if(divFinishes.length){
+    const divHtml = divFinishes.map(f=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg3);border-radius:8px">
+        <span style="font-size:13px;color:var(--muted)">Div. ${f.div} — Gruppo 1</span>
+        <span style="font-family:Rajdhani,sans-serif;font-size:20px;font-weight:700;color:var(--purple)">${f.count}×</span>
+      </div>`).join('');
+    document.getElementById('poSummaryGrid').insertAdjacentHTML('afterend',
+      `<div class="po-section-title">🏅 Arrivi in Gruppo 1 per Divisione</div>
+       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:4px">${divHtml}</div>`);
+  }
+
+  // Player playoff stats
+  const playerSec = document.getElementById('poPlayerSection');
+  const members = allMembers.filter(m=>+m.gamesPlayed>=1);
+
+  // Detect if API returns playoff-specific player fields
+  const hasPoFields = members.length>0 && members[0].gamesPlayedPlayoff !== undefined;
+
+  if(hasPoFields){
+    const poMembers = members
+      .filter(m=>+(m.gamesPlayedPlayoff||0)>0)
+      .sort((a,b)=>+(b.goalsPlayoff||0)-+(a.goalsPlayoff||0));
+
+    if(poMembers.length){
+      playerSec.innerHTML = `
+        <div class="po-section-title">👤 Giocatori nei Playoff</div>
+        <div style="overflow-x:auto">
+        <table class="po-player-table">
+          <thead><tr>
+            <th>Giocatore</th><th>Pos</th><th>PG</th><th>Gol</th><th>Assist</th>
+            <th>Rating</th><th>MoTM</th><th>Win%</th>
+          </tr></thead>
+          <tbody>${poMembers.map(m=>{
+            const gppo=Math.max(+(m.gamesPlayedPlayoff||0),1);
+            const gpo=+(m.goalsPlayoff||0), apo=+(m.assistsPlayoff||0);
+            const ratpo=+(m.ratingAvePlayoff||m.ratingAve||0);
+            const motmpo=+(m.manOfTheMatchPlayoff||0);
+            const wrpo=+(m.winRatePlayoff||m.winRate||0);
+            return `<tr>
+              <td><strong>${m.name}</strong></td>
+              <td><span class="pos-badge ${posClass(m.proPos)}">${posLabel(m.proPos)}</span></td>
+              <td style="color:var(--muted)">${m.gamesPlayedPlayoff}</td>
+              <td style="color:var(--gold2);font-weight:700">${gpo}</td>
+              <td>${apo}</td>
+              <td class="${rClass(ratpo)}">${ratpo}</td>
+              <td style="color:var(--purple)">${motmpo}</td>
+              <td style="color:${wrpo>=50?'var(--green)':'var(--red)'}">${wrpo}%</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table></div>`;
+    } else {
+      playerSec.innerHTML=`<div class="po-section-title">👤 Giocatori nei Playoff</div><p style="color:var(--muted);font-size:13px">Nessuna presenza playoff registrata per i giocatori attuali.</p>`;
+    }
+  } else {
+    // Fallback: mostra tutti i giocatori con nota
+    const sorted=[...members].sort((a,b)=>score(b)-score(a));
+    playerSec.innerHTML = `
+      <div class="po-section-title">👤 Performance Giocatori (stagione corrente)</div>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:12px">⚠️ Statistiche playoff per singolo giocatore non disponibili via API — dati stagionali totali.</p>
+      <div style="overflow-x:auto">
+      <table class="po-player-table">
+        <thead><tr>
+          <th>Giocatore</th><th>Pos</th><th>PG</th><th>Gol</th><th>Assist</th>
+          <th>Rating</th><th>Tiro%</th><th>Pass%</th><th>MoTM</th><th>Win%</th><th>Score</th>
+        </tr></thead>
+        <tbody>${sorted.map(m=>{
+          const sc=score(m);
+          const maxSc=score(sorted[0])||1;
+          return `<tr>
+            <td><strong>${m.name}</strong></td>
+            <td><span class="pos-badge ${posClass(m.proPos)}">${posLabel(m.proPos)}</span></td>
+            <td style="color:var(--muted)">${m.gamesPlayed}</td>
+            <td style="color:var(--gold2);font-weight:700">${m.goals}</td>
+            <td>${m.assists}</td>
+            <td class="${rClass(+m.ratingAve)}">${m.ratingAve}</td>
+            <td>${m.shotSuccessRate}%</td>
+            <td>${m.passSuccessRate}%</td>
+            <td style="color:var(--purple)">${m.manOfTheMatch}</td>
+            <td style="color:${+m.winRate>=50?'var(--green)':'var(--red)'}">${m.winRate}%</td>
+            <td><div style="display:flex;align-items:center;gap:6px">
+              <div class="po-bar"><div class="po-bar-fill" style="width:${Math.round(sc/maxSc*100)}%;background:linear-gradient(90deg,var(--green2),var(--green))"></div></div>
+              <span style="color:var(--green);font-weight:700;font-size:13px">${sc}</span>
+            </div></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table></div>`;
+  }
+
+  // Collect last 10 matches + fetch opponent stats in batch
+  const matchSec = document.getElementById('poMatchSection');
+  const matchData=[];
+  const oppIds=[];
+  for(let i=0;i<10;i++){
+    const v=club[`lastMatch${i}`];
+    const oppId=String(club[`lastOpponent${i}`]||'');
+    if(v===undefined||v===null||v==='') continue;
+    matchData.push({idx:i+1, result:+v, oppId});
+    if(oppId && !oppIds.includes(oppId)) oppIds.push(oppId);
+  }
+
+  // Fetch opponent stats one-by-one in parallel (EA API doesn't support batch)
+  const oppStats={};
+  if(oppIds.length){
+    try{
+      const results=await Promise.all(
+        oppIds.map(id=>
+          fetch(`${BASE}/clubs/overallStats?platform=${PLATFORM}&clubIds=${id}`)
+            .then(r=>r.ok?r.json():null).catch(()=>null)
+        )
+      );
+      results.forEach(d=>{
+        if(!d) return;
+        const c=Array.isArray(d)?d[0]:d;
+        if(c&&c.clubId) oppStats[String(c.clubId)]=c;
+      });
+    }catch(e){}
+  }
+
+  if(matchData.length){
+    const rows=matchData.map(m=>{
+      let badge,res,resColor;
+      if(m.result>=2){badge='pm-w';res='VITTORIA';resColor='var(--green)';}
+      else if(m.result===1){badge='pm-d';res='PAREGGIO';resColor='var(--gold)';}
+      else{badge='pm-l';res='SCONFITTA';resColor='var(--red)';}
+
+      const opp=oppStats[m.oppId];
+      let oppInfo='';
+      if(opp){
+        const ow=+opp.wins,od=+opp.ties,ol=+opp.losses,ot=ow+od+ol;
+        const owr=ot?Math.round(ow/ot*100):0;
+        oppInfo=`<span style="font-size:11px;color:var(--muted);margin-left:8px">Div.${opp.bestDivision} · SR ${opp.skillRating} · ${owr}%V</span>`;
+      }
+      const label=m.oppId?`Club ID ${m.oppId}`:'Avversario';
+      return `<div class="po-match-row">
+        <div class="po-match-num">${m.idx}</div>
+        <div>
+          <div class="po-match-opp" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">
+            <span>vs ${label}</span>${oppInfo}
+          </div>
+          <div class="po-match-opp-sub">Partita #${m.idx} della stagione recente</div>
+        </div>
+        <span class="po-match-badge ${badge}">${res}</span>
+      </div>`;
+    });
+    matchSec.innerHTML=`<div class="po-section-title">📅 Ultime 10 Partite</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">L'API EA non espone i nomi degli avversari — mostrati ID club con statistiche disponibili.</div>
+      <div class="po-match-list">${rows.join('')}</div>`;
+  }
+}
+
+/* ── Main ────────────────────────────────────────────────────────────── */
+async function main(){
+  try{
+    const [oR,mR,cR]=await Promise.all([
+      fetch(`${BASE}/clubs/overallStats?platform=${PLATFORM}&clubIds=${CLUB_ID}`),
+      fetch(`${BASE}/members/stats?platform=${PLATFORM}&clubId=${CLUB_ID}`),
+      fetch(`${BASE}/members/career/stats?platform=${PLATFORM}&clubId=${CLUB_ID}`)
+    ]);
+    const [overall,mData,cData]=await Promise.all([oR.json(),mR.json(),cR.json()]);
+
+    const club=overall[0];
+    playoffClubData=club;
+    const members=mData.members||[];
+    const career=cData.members||[];
+    allMembers=members;
+    career.forEach(c=>{ careerMap[c.name]=c; });
+
+    // Club header
+    const W=+club.wins,D=+club.ties,L=+club.losses,tot=W+D+L;
+    const wr=tot?Math.round(W/tot*100):0;
+    const G=+club.goals,GA=+club.goalsAgainst;
+
+    document.getElementById('skill').textContent=club.skillRating;
+    document.getElementById('div-pill').textContent=`Div. ${club.bestDivision}`;
+    document.getElementById('rep-pill').textContent=REP[club.reputationtier]||'Well Known';
+    if(+club.wstreak>1) document.getElementById('streak-pill').textContent=`🔥 ${club.wstreak} vinte di fila`;
+    else if(+club.unbeatenstreak>2) document.getElementById('streak-pill').textContent=`💪 ${club.unbeatenstreak} imbattuta`;
+    else document.getElementById('streak-pill').style.display='none';
+
+    document.getElementById('lW').textContent=W; document.getElementById('pW').textContent=`(${Math.round(W/tot*100)}%)`;
+    document.getElementById('lD').textContent=D; document.getElementById('pD').textContent=`(${Math.round(D/tot*100)}%)`;
+    document.getElementById('lL').textContent=L; document.getElementById('pL').textContent=`(${Math.round(L/tot*100)}%)`;
+    setTimeout(()=>{
+      document.getElementById('bW').style.width=(W/tot*100)+'%';
+      document.getElementById('bD').style.width=(D/tot*100)+'%';
+      document.getElementById('bL').style.width=(L/tot*100)+'%';
+    },200);
+    document.getElementById('winRatePct').textContent=wr+'%';
+    document.getElementById('d-g').textContent=G;
+    document.getElementById('d-ga').textContent=GA;
+    const gd=G-GA;
+    document.getElementById('d-gd').textContent=(gd>=0?'+':'')+gd;
+    document.getElementById('d-gd').style.color=gd>=0?'var(--green)':'var(--red)';
+    document.getElementById('d-po').textContent=club.gamesPlayedPlayoff;
+
+    // Donut
+    const dCtx=document.getElementById('donutChart').getContext('2d');
+    new Chart(dCtx,{type:'doughnut',data:{labels:['V','P','S'],datasets:[{data:[W,D,L],backgroundColor:['#00c853','#d4a843','#ff5252'],borderColor:'#0d0f1a',borderWidth:3,hoverOffset:8}]},options:{cutout:'72%',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}}}});
+
+    // Form strip (last 10 matches)
+    const formW=[], formCodes=[];
+    for(let i=0;i<10;i++){
+      const v=+club[`lastMatch${i}`];
+      formCodes.push(v);
+      let cls='fb-d',label='P';
+      if(v>1||v===2){cls='fb-w';label='V';}
+      else if(v<0){cls='fb-l';label='S';}
+      else if(v===1){cls='fb-d';label='P';}
+      else{cls='fb-l';label='S';}
+      formW.push(`<div class="form-bubble ${cls}" title="Partita ${i+1}">${label}</div>`);
+    }
+    document.getElementById('formBubbles').innerHTML=formW.join('');
+    const recentW=formCodes.filter(v=>v>=2).length;
+    const recentD=formCodes.filter(v=>v===1).length;
+    const recentL=formCodes.filter(v=>v<0||v===0).length;
+    document.getElementById('formMeta').innerHTML=`<span>Ultime 10: <b>${recentW}V</b> <b>${recentD}P</b> <b>${recentL}S</b></span><span>Imbattuta corrente: <b>${club.unbeatenstreak} partite</b></span><span>Striscia vittorie: <b>${club.wstreak}</b></span>`;
+
+    // Stats row
+    const gpg=(G/tot).toFixed(2), gapg=(GA/tot).toFixed(2);
+    document.getElementById('s-tot').textContent=tot;
+    document.getElementById('s-lega').textContent=club.leagueAppearances+' in lega';
+    document.getElementById('s-gpg').textContent=gpg;
+    document.getElementById('s-gpg-b').textContent=+gpg>=3?'🔥 Attacco devastante':+gpg>=2?'👍 Buon attacco':'⚠️ Da migliorare';
+    document.getElementById('s-gpg-b').className='sbadge '+(+gpg>=2.5?'sbg':+gpg>=2?'sbo':'sbr');
+    document.getElementById('s-gapg').textContent=gapg;
+    document.getElementById('s-gapg-b').textContent=+gapg<=2?'🛡️ Difesa solida':+gapg<=3?'👍 Difesa discreta':'⚠️ Difesa fragile';
+    document.getElementById('s-gapg-b').className='sbadge '+(+gapg<=2.5?'sbg':+gapg<=3?'sbo':'sbr');
+    document.getElementById('s-bdiv').textContent='Div. '+club.bestDivision;
+    document.getElementById('s-prom').textContent=club.promotions+' promozioni';
+    document.getElementById('s-playoff').textContent=club.gamesPlayedPlayoff;
+    document.getElementById('s-bgroup').textContent='Migl. finale: Gruppo '+club.bestFinishGroup;
+    document.getElementById('s-members').textContent=members.length;
+
+    // Playoff section
+    document.getElementById('po-games').textContent=club.gamesPlayedPlayoff;
+    const poPct=tot?Math.round(+club.gamesPlayedPlayoff/tot*100):0;
+    document.getElementById('po-pct').textContent=poPct+'% delle partite totali';
+    document.getElementById('po-bgroup').textContent='Gruppo '+club.bestFinishGroup;
+    document.getElementById('po-prom').textContent=club.promotions;
+    document.getElementById('po-rel').textContent=club.relegations+' retrocessioni';
+    document.getElementById('po-rel2').textContent=club.relegations;
+
+    // Top performers
+    const q=members.filter(m=>+m.gamesPlayed>=5);
+    if(q.length){
+      const ts=[...q].sort((a,b)=>+b.goals-+a.goals)[0];
+      const ta=[...q].sort((a,b)=>+b.assists-+a.assists)[0];
+      const tr=[...q].sort((a,b)=>+b.ratingAve-+a.ratingAve)[0];
+      const tm=[...q].sort((a,b)=>+b.manOfTheMatch-+a.manOfTheMatch)[0];
+      document.getElementById('tp1n').textContent=ts.name; document.getElementById('tp1v').textContent=ts.goals; document.getElementById('tp1s').textContent=(+ts.goals/Math.max(+ts.gamesPlayed,1)).toFixed(2)+' gol/partita';
+      document.getElementById('tp2n').textContent=ta.name; document.getElementById('tp2v').textContent=ta.assists; document.getElementById('tp2s').textContent=(+ta.assists/Math.max(+ta.gamesPlayed,1)).toFixed(2)+' assist/partita';
+      document.getElementById('tp3n').textContent=tr.name; document.getElementById('tp3v').textContent=tr.ratingAve; document.getElementById('tp3s').textContent=tr.gamesPlayed+' partite giocate';
+      document.getElementById('tp4n').textContent=tm.name; document.getElementById('tp4v').textContent=tm.manOfTheMatch; document.getElementById('tp4s').textContent=Math.round(+tm.manOfTheMatch/Math.max(+tm.gamesPlayed,1)*100)+'% delle sue partite';
+    }
+
+    renderTable();
+    renderProfiles(members);
+
+    // Bar charts
+    const sorted=[...members].sort((a,b)=>score(b)-score(a));
+    const names=sorted.map(m=>m.name);
+    buildBar('c1',names,sorted.map(m=>+m.goals),'Gol',sorted.map(()=>'rgba(212,168,67,.7)'),sorted.map(()=>'#d4a843'));
+    buildBar('c2',names,sorted.map(m=>+m.ratingAve),'Rating',sorted.map(()=>'rgba(0,230,118,.7)'),sorted.map(()=>'#00e676'));
+    buildBar('c3',names,sorted.map(m=>+m.goals+ +m.assists),'G+A',sorted.map(()=>'rgba(68,138,255,.7)'),sorted.map(()=>'#448aff'));
+    buildBar('c4',names,sorted.map(m=>+m.winRate),'Win%',sorted.map(m=>+m.winRate>=50?'rgba(0,230,118,.7)':'rgba(255,82,82,.7)'),sorted.map(m=>+m.winRate>=50?'#00e676':'#ff5252'));
+
+    // Reveal
+    document.getElementById('loader').style.transition='opacity .5s';
+    document.getElementById('loader').style.opacity='0';
+    setTimeout(()=>{ document.getElementById('loader').style.display='none'; document.getElementById('app').style.display='block'; },500);
+
+  } catch(err){
+    document.getElementById('loader').innerHTML=`<div style="text-align:center;padding:40px;max-width:500px">
+      <div style="font-size:48px;margin-bottom:16px">⚠️</div>
+      <div style="font-family:Rajdhani,sans-serif;font-size:24px;color:#d4a843;margin-bottom:12px">Errore di caricamento</div>
+      <div style="color:#6b7280;font-size:14px;line-height:1.6">${err.message}</div>
+      <button onclick="location.reload()" style="margin-top:20px;padding:10px 24px;background:rgba(212,168,67,.15);border:1px solid #d4a843;color:#d4a843;border-radius:8px;cursor:pointer;font-family:Rajdhani,sans-serif;font-size:16px;font-weight:600">Riprova</button>
+    </div>`;
+  }
+}
+
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closePlayoffModal(); });
+
+main();
+</script>
+</body>
+</html>
