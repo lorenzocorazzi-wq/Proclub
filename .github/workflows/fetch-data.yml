@@ -1,9 +1,7 @@
 name: Fetch EA Pro Clubs Data
 
 on:
-  schedule:
-    - cron: '0 * * * *'   # ogni ora
-  workflow_dispatch:        # trigger manuale
+  workflow_dispatch:        # solo trigger manuale
 
 permissions:
   contents: write
